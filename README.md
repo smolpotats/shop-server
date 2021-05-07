@@ -1,7 +1,7 @@
 # Project 3 - Shop Server
 ## Backend Express API
-### :potato: Smol Potats :potato:
-Amalia Advincula-Roye, Elaine Chan, Kristian Llano
+#### :potato: Smol Potats :potato:
+##### Amalia Advincula-Roye, Elaine Chan, Kristian Llano
 
 
 ### Authentication
