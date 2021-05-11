@@ -10,7 +10,10 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  isComplete: Boolean,
+  isComplete: {
+    type: Boolean,
+    default: false
+  },
   dateCompleted: Date,
   owner: {
     type: mongoose.Schema.Types.ObjectId,
