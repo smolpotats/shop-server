@@ -31,7 +31,7 @@ router.get('/orders', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// SHOW
+/* // SHOW
 // GET /orders/5a7db6c74d55bc51bdf39793
 router.get('/orders/:id', requireToken, (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
@@ -41,13 +41,15 @@ router.get('/orders/:id', requireToken, (req, res, next) => {
     .then(order => res.status(200).json({ order: order.toObject() }))
     // if an error occurs, pass it to the handler
     .catch(next)
-})
+}) */
 
-// CREATE
+// CREATE - when the user clicks the 'purchase' button on /product/:id page
 // POST /orders
 router.post('/orders', requireToken, (req, res, next) => {
   // set owner of new order to be current user
   req.body.order.owner = req.user.id
+  req.body.order.product = req.product.id
+  req.body.order.total = req.product.price
 
   Order.create(req.body.order)
     // respond to succesful `create` with status 201 and JSON of new "order"
@@ -60,7 +62,7 @@ router.post('/orders', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-// UPDATE
+/* // UPDATE
 // PATCH /orders/5a7db6c74d55bc51bdf39793
 router.patch('/orders/:id', requireToken, removeBlanks, (req, res, next) => {
   // if the client attempts to change the `owner` property by including a new
@@ -81,9 +83,9 @@ router.patch('/orders/:id', requireToken, removeBlanks, (req, res, next) => {
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
     .catch(next)
-})
+}) */
 
-// DESTROY
+// CANCEL - when the user clicks 'delete order' on /orders page
 // DELETE /orders/5a7db6c74d55bc51bdf39793
 router.delete('/orders/:id', requireToken, (req, res, next) => {
   Order.findById(req.params.id)
