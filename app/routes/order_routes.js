@@ -1,19 +1,15 @@
 const express = require('express')
 const passport = require('passport')
 
-const Order = require('../models/order')
-
 const customErrors = require('../../lib/custom_errors')
-
 const handle404 = customErrors.handle404
-
 const requireOwnership = customErrors.requireOwnership
-
-const removeBlanks = require('../../lib/remove_blank_fields')
-
+// const removeBlanks = require('../../lib/remove_blank_fields')
 const requireToken = passport.authenticate('bearer', { session: false })
-
 const router = express.Router()
+
+const Order = require('../models/order')
+const Product = require('../models/product')
 
 // INDEX
 // GET /orders
@@ -31,8 +27,46 @@ router.get('/orders', requireToken, (req, res, next) => {
     .catch(next)
 })
 
+// CREATE - when the user clicks the 'purchase' button on /product/:id page
+// POST /orders
+router.post('/orders', requireToken, (req, res, next) => {
+  /* REQUEST DATA: order: { product: 'product._id' } */
+  const order = req.body.order
+  order.owner = req.user.id
+
+  Product.findById(order.product)
+    .then(handle404)
+    .then(product => {
+      order.total = product.price
+      Order.create(order)
+        .then(order => {
+          res.status(201).json({ order: order })
+        })
+        .catch(next)
+    })
+    .catch(next)
+})
+
+// CANCEL - when the user clicks 'delete order' on /orders page
+// DELETE /orders/:id
+router.delete('/orders/:id', requireToken, (req, res, next) => {
+  const order = req.params.id
+  Order.findById(order)
+    .then(handle404)
+    .then(order => {
+      // throw an error if current user doesn't own `order`
+      requireOwnership(req, order)
+      // delete the order ONLY IF the above didn't throw
+      order.deleteOne()
+    })
+    // send back 204 and no content if the deletion succeeded
+    .then(() => res.sendStatus(204))
+    // if an error occurs, pass it to the handler
+    .catch(next)
+})
+
 /* // SHOW
-// GET /orders/5a7db6c74d55bc51bdf39793
+// GET /orders/:id
 router.get('/orders/:id', requireToken, (req, res, next) => {
   // req.params.id will be set based on the `:id` in the route
   Order.findById(req.params.id)
@@ -42,25 +76,6 @@ router.get('/orders/:id', requireToken, (req, res, next) => {
     // if an error occurs, pass it to the handler
     .catch(next)
 }) */
-
-// CREATE - when the user clicks the 'purchase' button on /product/:id page
-// POST /orders
-router.post('/orders', requireToken, (req, res, next) => {
-  // set owner of new order to be current user
-  req.body.order.owner = req.user.id
-  req.body.order.product = req.product.id
-  req.body.order.total = req.product.price
-
-  Order.create(req.body.order)
-    // respond to succesful `create` with status 201 and JSON of new "order"
-    .then(order => {
-      res.status(201).json({ order: order.toObject() })
-    })
-    // if an error occurs, pass it off to our error handler
-    // the error handler needs the error message and the `res` object so that it
-    // can send an error message back to the client
-    .catch(next)
-})
 
 /* // UPDATE
 // PATCH /orders/5a7db6c74d55bc51bdf39793
@@ -83,23 +98,6 @@ router.patch('/orders/:id', requireToken, removeBlanks, (req, res, next) => {
     .then(() => res.sendStatus(204))
     // if an error occurs, pass it to the handler
     .catch(next)
-}) */
-
-// CANCEL - when the user clicks 'delete order' on /orders page
-// DELETE /orders/5a7db6c74d55bc51bdf39793
-router.delete('/orders/:id', requireToken, (req, res, next) => {
-  Order.findById(req.params.id)
-    .then(handle404)
-    .then(order => {
-      // throw an error if current user doesn't own `order`
-      requireOwnership(req, order)
-      // delete the order ONLY IF the above didn't throw
-      order.deleteOne()
-    })
-    // send back 204 and no content if the deletion succeeded
-    .then(() => res.sendStatus(204))
-    // if an error occurs, pass it to the handler
-    .catch(next)
-})
+  }) */
 
 module.exports = router
