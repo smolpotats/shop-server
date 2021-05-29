@@ -14,6 +14,8 @@ const Product = require('../models/product')
 // INDEX
 // GET /orders
 router.get('/orders', requireToken, (req, res, next) => {
+  // const user = req.user
+  // console.log('req:', req)
   Order.find()
     .then(orders => {
       // `orders` will be an array of Mongoose documents
