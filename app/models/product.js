@@ -15,6 +15,9 @@ const productSchema = new mongoose.Schema({
     type: Number,
     min: 0,
     required: true
+  },
+  image: {
+    type: String
   }
 }, { // create data to include when creating an object
   toObject: { virtuals: true },
