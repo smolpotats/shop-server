@@ -18,6 +18,11 @@ const productSchema = new mongoose.Schema({
   },
   image: {
     type: String
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   }
 }, { // create data to include when creating an object
   toObject: { virtuals: true },
