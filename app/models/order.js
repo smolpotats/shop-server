@@ -64,11 +64,11 @@ const orderSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  isComplete: {
-    type: Boolean,
-    default: false
+  deliveryType: {
+    type: String,
+    required: true
   },
-  dateCompleted: Date,
+  dateOrdered: Date,
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
