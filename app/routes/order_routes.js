@@ -4,19 +4,19 @@ const passport = require('passport')
 const customErrors = require('../../lib/custom_errors')
 const handle404 = customErrors.handle404
 const requireOwnership = customErrors.requireOwnership
-// const removeBlanks = require('../../lib/remove_blank_fields')
+const removeBlanks = require('../../lib/remove_blank_fields')
 const requireToken = passport.authenticate('bearer', { session: false })
 const router = express.Router()
 
 const Order = require('../models/order')
 const Product = require('../models/product')
 
-// INDEX
-// GET /orders
+// I want to figure out how to add the product name and info in the order array
+
+// INDEX - GET all orders the user created
 router.get('/orders', requireToken, (req, res, next) => {
-  // const user = req.user
-  // console.log('req:', req)
-  Order.find()
+  Order.find({ owner: req.user })
+    .then(handle404)
     .then(orders => {
       // `orders` will be an array of Mongoose documents
       // we want to convert each one to a POJO, so we use `.map` to
@@ -30,7 +30,6 @@ router.get('/orders', requireToken, (req, res, next) => {
 })
 
 // CREATE - when the user clicks the 'purchase' button on /product/:id page
-// POST /orders
 router.post('/orders', requireToken, (req, res, next) => {
   /* REQUEST DATA: order: { product: 'product._id' } */
   const order = req.body.order
@@ -38,6 +37,7 @@ router.post('/orders', requireToken, (req, res, next) => {
 
   Product.findById(order.product)
     .then(handle404)
+    // change the product price to the price of the product
     .then(product => {
       order.total = product.price
       Order.create(order)
@@ -50,7 +50,6 @@ router.post('/orders', requireToken, (req, res, next) => {
 })
 
 // CANCEL - when the user clicks 'delete order' on /orders page
-// DELETE /orders/:id
 router.delete('/orders/:id', requireToken, (req, res, next) => {
   const order = req.params.id
   Order.findById(order)
@@ -67,19 +66,7 @@ router.delete('/orders/:id', requireToken, (req, res, next) => {
     .catch(next)
 })
 
-/* // SHOW
-// GET /orders/:id
-router.get('/orders/:id', requireToken, (req, res, next) => {
-  // req.params.id will be set based on the `:id` in the route
-  Order.findById(req.params.id)
-    .then(handle404)
-    // if `findById` is succesful, respond with 200 and "order" JSON
-    .then(order => res.status(200).json({ order: order.toObject() }))
-    // if an error occurs, pass it to the handler
-    .catch(next)
-}) */
-
-/* // UPDATE
+// UPDATE
 // PATCH /orders/5a7db6c74d55bc51bdf39793
 router.patch('/orders/:id', requireToken, removeBlanks, (req, res, next) => {
   // if the client attempts to change the `owner` property by including a new
@@ -98,6 +85,17 @@ router.patch('/orders/:id', requireToken, removeBlanks, (req, res, next) => {
     })
     // if that succeeded, return 204 and no JSON
     .then(() => res.sendStatus(204))
+    // if an error occurs, pass it to the handler
+    .catch(next)
+})
+/* // SHOW
+// GET /orders/:id
+router.get('/orders/:id', requireToken, (req, res, next) => {
+  // req.params.id will be set based on the `:id` in the route
+  Order.findById(req.params.id)
+    .then(handle404)
+    // if `findById` is succesful, respond with 200 and "order" JSON
+    .then(order => res.status(200).json({ order: order.toObject() }))
     // if an error occurs, pass it to the handler
     .catch(next)
   }) */
