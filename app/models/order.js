@@ -68,7 +68,6 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  dateOrdered: Date,
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
